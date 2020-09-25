@@ -37,9 +37,15 @@ public class GameManager : MonoBehaviour
 
     GameObject gecerliKare;
 
+    public AudioSource audioSource;
+
+    public AudioClip butonSesi;
+
     private void Awake()
     {
         kalanHak = 3;
+
+        audioSource = GetComponent<AudioSource>();
 
         kalanHaklarManager = Object.FindObjectOfType<KalanHaklarManager>();
         puanManager = Object.FindObjectOfType<PuanManager>();
@@ -76,6 +82,8 @@ public class GameManager : MonoBehaviour
     {
         if (butonaBasilsinmi)
         {
+            audioSource.PlayOneShot(butonSesi);
+
             butonDegeri = int.Parse(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.transform.GetChild(0).GetComponent<Text>().text);
 
             gecerliKare = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject;
