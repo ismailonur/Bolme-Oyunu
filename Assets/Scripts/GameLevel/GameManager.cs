@@ -10,9 +10,13 @@ public class GameManager : MonoBehaviour
     public GameObject soruPaneli;
     public Transform karelerPaneli;
 
+    public GameObject sonucPaneli;
+
     public Text soruText;
 
     private GameObject[] karelerDizisi = new GameObject[25];
+
+    public Sprite[] kareSprites;
 
     List<int> bolumDegerleriListesi = new List<int>();
 
@@ -31,6 +35,8 @@ public class GameManager : MonoBehaviour
 
     PuanManager puanManager;
 
+    GameObject gecerliKare;
+
     private void Awake()
     {
         kalanHak = 3;
@@ -45,6 +51,7 @@ public class GameManager : MonoBehaviour
     {
         butonaBasilsinmi = false;
         soruPaneli.GetComponent<RectTransform>().localScale = Vector3.zero;
+        sonucPaneli.GetComponent<RectTransform>().localScale = Vector3.zero;
 
         kareleriOlustur();
     }
@@ -54,6 +61,7 @@ public class GameManager : MonoBehaviour
         for(int i = 0; i < 25; i++)
         {
             GameObject kare = Instantiate(karePrefab, karelerPaneli);
+            kare.transform.GetChild(1).GetComponent<Image>().sprite = kareSprites[Random.Range(0, kareSprites.Length)];
             kare.transform.GetComponent<Button>().onClick.AddListener(() => ButonaBasildi());
             karelerDizisi[i] = kare;
         }
@@ -70,6 +78,8 @@ public class GameManager : MonoBehaviour
         {
             butonDegeri = int.Parse(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.transform.GetChild(0).GetComponent<Text>().text);
 
+            gecerliKare = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject;
+
             SonucuKontrolEt();
         }
     }
@@ -78,17 +88,40 @@ public class GameManager : MonoBehaviour
     {
         if(butonDegeri == dogruSonuc)
         {
+            gecerliKare.transform.GetChild(1).GetComponent<Image>().enabled = true;
+            gecerliKare.transform.GetChild(0).GetComponent<Text>().text = "";
+            gecerliKare.transform.GetComponent<Button>().interactable = false;
+
             puanManager.PuaniArttir(sorununZorlukDerecesi);
 
             bolumDegerleriListesi.RemoveAt(kacinciSoru);
 
-            SoruPaneliniAc();
+            if (bolumDegerleriListesi.Count > 0)
+            {
+                SoruPaneliniAc();
+            }
+            else
+            {
+                OyunBitti();
+            }
+            
         }
         else
         {
             kalanHak--;
             kalanHaklarManager.KalanHaklariKontrolEt(kalanHak);
         }
+
+        if (kalanHak <= 0)
+        {
+            OyunBitti();
+        }
+    }
+
+    void OyunBitti()
+    {
+        butonaBasilsinmi = false;
+        sonucPaneli.GetComponent<RectTransform>().DOScale(1, .5f).SetEase(Ease.OutBack);
     }
 
     IEnumerator DoFadeRoutine()
